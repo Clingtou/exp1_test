@@ -222,7 +222,11 @@ li {
 }
 
 .study-shell.stimulus-shell .qualtrics-card {
-  padding: 42px 52px 50px 52px;
+  padding: 38px 52px 44px 52px;
+}
+
+.study-shell.stimulus-shell {
+  width: min(1500px, calc(100vw - 56px));
 }
 
 .stimulus-content {
@@ -233,7 +237,7 @@ li {
 
 .offer-title {
   width: 100%;
-  font-size: 32px;
+  font-size: 34px;
   line-height: 1.2;
   font-weight: 700;
   margin: 0 0 8px 0;
@@ -251,16 +255,16 @@ li {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 520px;
-  margin-top: -8px;
+  min-height: 500px;
+  margin-top: -24px;
   width: 100%;
 }
 
 .rose-chart {
-  width: min(720px, 62vw);
-  height: min(590px, 51vw);
-  min-width: 650px;
-  min-height: 530px;
+  width: min(780px, 64vw);
+  height: min(560px, 46vw);
+  min-width: 700px;
+  min-height: 500px;
   overflow: visible;
 }
 
@@ -271,14 +275,14 @@ li {
 
 .callout-line {
   fill: none;
-  stroke-width: 4;
+  stroke-width: 4.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .callout-text {
   fill: #111827;
-  font-size: 27px;
+  font-size: 34px;
   font-weight: 700;
   pointer-events: none;
 }
@@ -291,7 +295,7 @@ li {
   display: flex;
   justify-content: center;
   gap: 22px;
-  margin-top: -12px;
+  margin-top: -34px;
   width: 100%;
 }
 
