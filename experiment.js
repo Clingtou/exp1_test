@@ -9,7 +9,7 @@ const BASE_PAYMENT_USD = 1.00;
 const BONUS_DRAW_PERCENT = 10;
 
 const YOU_ORANGE = "#f28e2b";
-const OTHER_BLUE = "#4e79a7";
+const OTHER_BLUE = "#22b8cf";
 
 const jsPsych = initJsPsych({
   use_webaudio: false,
@@ -210,31 +210,49 @@ function labelPosition(cx, cy, radius, startAngle, endAngle, factor) {
   return polarToCartesian(cx, cy, radius * factor, midAngle);
 }
 
+function calloutHtml(cx, cy, sectorRadius, labelRadius, textRadius, startAngle, endAngle, label, amount, color) {
+  const midAngle = startAngle + (endAngle - startAngle) / 2;
+  const edge = polarToCartesian(cx, cy, sectorRadius + 8, midAngle);
+  const elbow = polarToCartesian(cx, cy, labelRadius, midAngle);
+  const text = polarToCartesian(cx, cy, textRadius, midAngle);
+  const dx = text.x - cx;
+  const anchor = Math.abs(dx) < 46 ? "middle" : dx > 0 ? "start" : "end";
+  const textOffset = anchor === "middle" ? 0 : dx > 0 ? 12 : -12;
+
+  return `
+    <g class="callout-group">
+      <path class="callout-line" d="M ${edge.x} ${edge.y} L ${elbow.x} ${elbow.y} L ${text.x + textOffset * 0.45} ${text.y}" stroke="${color}"></path>
+      <circle class="callout-dot" cx="${edge.x}" cy="${edge.y}" r="4.5" fill="${color}"></circle>
+      <text class="callout-text" x="${text.x + textOffset}" y="${text.y}" text-anchor="${anchor}">
+        <tspan class="callout-person" x="${text.x + textOffset}" dy="-0.2em">${label}</tspan>
+        <tspan class="callout-amount" x="${text.x + textOffset}" dy="1.35em">${amount} cents</tspan>
+      </text>
+    </g>
+  `;
+}
+
 function roseChartHtml(condition) {
-  const cx = 330;
+  const cx = 390;
   const cy = 330;
-  const baseRadius = 135;
+  const baseRadius = 122;
   const youRadius = baseRadius * condition.you_radius_multiplier;
   const otherRadius = baseRadius * condition.other_radius_multiplier;
+  const maxRadius = Math.max(youRadius, otherRadius);
+  const labelRadius = maxRadius + 38;
+  const textRadius = maxRadius + 105;
   const youAngle = condition.you / 100 * 360;
   const otherAngle = 360 - youAngle;
   const youStart = condition.center_angle_degrees - youAngle / 2;
   const youEnd = condition.center_angle_degrees + youAngle / 2;
   const otherStart = youEnd;
   const otherEnd = youEnd + otherAngle;
-  const youLabel = labelPosition(cx, cy, youRadius, youStart, youEnd, condition.you_radius_multiplier > 1 ? 0.61 : 0.70);
-  const youAmount = labelPosition(cx, cy, youRadius, youStart, youEnd, condition.you_radius_multiplier > 1 ? 0.78 : 0.88);
-  const otherLabel = labelPosition(cx, cy, otherRadius, otherStart, otherEnd, condition.other_radius_multiplier > 1 ? 0.54 : 0.66);
-  const otherAmount = labelPosition(cx, cy, otherRadius, otherStart, otherEnd, condition.other_radius_multiplier > 1 ? 0.68 : 0.84);
 
   return `
-    <svg class="rose-chart" viewBox="0 0 660 660" role="img" aria-label="Pie chart showing the proposed allocation">
+    <svg class="rose-chart" viewBox="0 0 780 640" role="img" aria-label="Pie chart showing the proposed allocation">
       <path class="sector" d="${sectorPath(cx, cy, otherRadius, otherStart, otherEnd)}" fill="${condition.other_color}"></path>
       <path class="sector" d="${sectorPath(cx, cy, youRadius, youStart, youEnd)}" fill="${condition.you_color}"></path>
-      <text class="sector-label" x="${youLabel.x}" y="${youLabel.y}">you</text>
-      <text class="sector-amount" x="${youAmount.x}" y="${youAmount.y}">${condition.you} cents</text>
-      <text class="sector-label" x="${otherLabel.x}" y="${otherLabel.y}">other</text>
-      <text class="sector-amount" x="${otherAmount.x}" y="${otherAmount.y}">${condition.other} cents</text>
+      ${calloutHtml(cx, cy, youRadius, labelRadius, textRadius, youStart, youEnd, "you", condition.you, condition.you_color)}
+      ${calloutHtml(cx, cy, otherRadius, labelRadius, textRadius, otherStart, otherEnd, "other", condition.other, condition.other_color)}
     </svg>
   `;
 }
@@ -459,25 +477,13 @@ function exclusionTrial() {
 
 function decisionTrial(condition) {
   const html = shellHtml(`
-    <div class="stimulus-grid">
-      <div>
-        <div class="offer-title">The other participant proposed this allocation of 100 cents.</div>
-        <div class="offer-subtitle">Please decide whether to accept or reject this proposal.</div>
-        <div class="rose-wrap">${roseChartHtml(condition)}</div>
-      </div>
-      <div class="decision-panel">
-        <div class="decision-question">
-          If you accept, you receive <b>${condition.you} cents</b> and the other participant receives <b>${condition.other} cents</b>.<br><br>
-          If you reject, both of you receive <b>0 cents</b>.
-        </div>
-        <div class="legend-box">
-          <div class="legend-row"><span class="legend-swatch" style="background:${condition.you_color}"></span><span>you: ${condition.you} cents</span></div>
-          <div class="legend-row"><span class="legend-swatch" style="background:${condition.other_color}"></span><span>other: ${condition.other} cents</span></div>
-        </div>
-        <div class="decision-buttons">
-          <button class="decision-button" type="button" data-choice="accept">Accept</button>
-          <button class="decision-button" type="button" data-choice="reject">Reject</button>
-        </div>
+    <div class="stimulus-content">
+      <div class="offer-title">The other participant proposed this allocation of 100 cents.</div>
+      <div class="offer-subtitle">Please decide whether to accept or reject this proposal.</div>
+      <div class="rose-wrap">${roseChartHtml(condition)}</div>
+      <div class="decision-buttons">
+        <button class="decision-button" type="button" data-choice="accept">Accept</button>
+        <button class="decision-button" type="button" data-choice="reject">Reject</button>
       </div>
     </div>
   `, "Ultimatum Game Study", "stimulus-shell");
