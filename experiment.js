@@ -217,15 +217,14 @@ function calloutHtml(cx, cy, sectorRadius, labelRadius, textRadius, startAngle, 
   const text = polarToCartesian(cx, cy, textRadius, midAngle);
   const dx = text.x - cx;
   const anchor = Math.abs(dx) < 46 ? "middle" : dx > 0 ? "start" : "end";
-  const textOffset = anchor === "middle" ? 0 : dx > 0 ? 12 : -12;
+  const textOffset = anchor === "middle" ? 0 : dx > 0 ? 18 : -18;
 
   return `
     <g class="callout-group">
-      <path class="callout-line" d="M ${edge.x} ${edge.y} L ${elbow.x} ${elbow.y} L ${text.x + textOffset * 0.45} ${text.y}" stroke="${color}"></path>
-      <circle class="callout-dot" cx="${edge.x}" cy="${edge.y}" r="4.5" fill="${color}"></circle>
+      <path class="callout-line" d="M ${edge.x} ${edge.y} L ${elbow.x} ${elbow.y} L ${text.x + textOffset * 0.55} ${text.y}" stroke="#111827"></path>
       <text class="callout-text" x="${text.x + textOffset}" y="${text.y}" text-anchor="${anchor}">
-        <tspan class="callout-person" x="${text.x + textOffset}" dy="-0.2em">${label}</tspan>
-        <tspan class="callout-amount" x="${text.x + textOffset}" dy="1.35em">${amount} cents</tspan>
+        <tspan class="callout-person" x="${text.x + textOffset}" dy="-0.18em">${label}</tspan>
+        <tspan class="callout-amount" x="${text.x + textOffset}" dy="1.28em">${amount} cents</tspan>
       </text>
     </g>
   `;
@@ -238,8 +237,8 @@ function roseChartHtml(condition) {
   const youRadius = baseRadius * condition.you_radius_multiplier;
   const otherRadius = baseRadius * condition.other_radius_multiplier;
   const maxRadius = Math.max(youRadius, otherRadius);
-  const labelRadius = maxRadius + 38;
-  const textRadius = maxRadius + 105;
+  const labelRadius = maxRadius + 42;
+  const textRadius = maxRadius + 132;
   const youAngle = condition.you / 100 * 360;
   const otherAngle = 360 - youAngle;
   const youStart = condition.center_angle_degrees - youAngle / 2;
@@ -248,7 +247,7 @@ function roseChartHtml(condition) {
   const otherEnd = youEnd + otherAngle;
 
   return `
-    <svg class="rose-chart" viewBox="0 0 780 640" role="img" aria-label="Pie chart showing the proposed allocation">
+    <svg class="rose-chart" viewBox="0 -80 780 760" role="img" aria-label="Pie chart showing the proposed allocation">
       <path class="sector" d="${sectorPath(cx, cy, otherRadius, otherStart, otherEnd)}" fill="${condition.other_color}"></path>
       <path class="sector" d="${sectorPath(cx, cy, youRadius, youStart, youEnd)}" fill="${condition.you_color}"></path>
       ${calloutHtml(cx, cy, youRadius, labelRadius, textRadius, youStart, youEnd, "you", condition.you, condition.you_color)}
