@@ -101,11 +101,36 @@ li {
 
 .fullscreen-message {
   width: min(860px, calc(100vw - 72px));
-  margin: 0 auto 20px auto;
+  margin: -5vh auto 20px auto;
   text-align: center;
   color: var(--text);
   font-size: 21px;
   line-height: 1.6;
+}
+
+.fullscreen-message p {
+  font-size: 20px;
+  line-height: 1.48;
+}
+
+.fullscreen-consent {
+  width: fit-content;
+  max-width: 100%;
+  margin: 22px auto 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.fullscreen-consent input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--blue);
 }
 
 #jspsych-content:has(.fullscreen-message) {
@@ -140,6 +165,12 @@ li {
 .primary-btn:hover,
 .form-submit:hover {
   background: var(--blue-dark) !important;
+}
+
+.jspsych-btn:disabled,
+.jspsych-btn.is-disabled {
+  opacity: 0.48;
+  cursor: not-allowed !important;
 }
 
 .form-question {
@@ -209,15 +240,15 @@ li {
 
 .example-chart {
   width: 100%;
-  min-height: 310px;
+  min-height: 220px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .example-chart .rose-chart {
-  width: min(560px, 58vw);
-  height: 320px;
+  width: min(520px, 56vw);
+  height: 245px;
   min-width: 0;
   min-height: 0;
 }
@@ -233,6 +264,18 @@ li {
 .example-note {
   font-size: 18px;
   line-height: 1.45;
+}
+
+.instruction-figure-wrap {
+  margin: 22px 0 24px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.instruction-figure {
+  width: min(100%, 980px);
+  height: auto;
+  display: block;
 }
 
 .required-note {
