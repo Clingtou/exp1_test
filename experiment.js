@@ -218,13 +218,15 @@ function calloutTextHtml(x, y, label, amount, anchor = "middle") {
   `;
 }
 
-function roseChartHtml(condition) {
+function roseChartHtml(condition, options = {}) {
+  const compact = options.compact === true;
   const cx = 390;
-  const baseCy = 382;
-  const baseRadius = 124;
+  const baseCy = compact ? 280 : 382;
+  const baseRadius = compact ? 92 : 124;
   const edgeGap = 24;
   const lineGap = 40;
   const amountTextHeight = 25;
+  const viewBoxHeight = compact ? 520 : 700;
   const youRadius = baseRadius * condition.you_radius_multiplier;
   const otherRadius = baseRadius * condition.other_radius_multiplier;
   let cy = baseCy;
@@ -266,7 +268,7 @@ function roseChartHtml(condition) {
   }
 
   return `
-    <svg class="rose-chart" viewBox="0 0 780 700" role="img" aria-label="Pie chart showing the proposed allocation">
+    <svg class="rose-chart" viewBox="0 0 780 ${viewBoxHeight}" role="img" aria-label="Pie chart showing the proposed allocation">
       <path class="sector" d="${sectorPath(cx, cy, otherRadius, otherStart, otherEnd)}" fill="${condition.other_color}"></path>
       <path class="sector" d="${sectorPath(cx, cy, youRadius, youStart, youEnd)}" fill="${condition.you_color}"></path>
       ${labelHtml}
@@ -284,7 +286,7 @@ function exampleRoseChartHtml(condition) {
     center_angle_degrees: condition.center_angle_degrees,
     you_color: condition.you_color,
     other_color: condition.other_color
-  });
+  }, { compact: true });
 }
 
 function collectFormData(form) {
@@ -315,17 +317,21 @@ function instructionTrial() {
     type: jsPsychHtmlButtonResponse,
     stimulus: shellHtml(`
       <h2 class="intro-title">Instructions</h2>
-      <p>In this study, you will take part in a short economic decision task called the Ultimatum Game.</p>
-      <p>You will be the <b>receiver</b>. Another participant, who previously completed the proposer part of this study, has already made a proposal about how to divide <b>100 cents</b> between themself and a receiver.</p>
-      <p>On the next decision page, you will see one proposal selected from our existing proposer database. The proposal shows how much money would go to <b>you</b> and how much would go to the <b>other</b> participant.</p>
-      <p>Your task is to decide whether to <b>accept</b> or <b>reject</b> the proposal.</p>
+      <p>In this study, you will take part in a short economic decision task. You will receive a base payment of <b>$${BASE_PAYMENT_USD.toFixed(2)}</b> for completing the study carefully.</p>
+      <p>There are two roles in this task: <b>proposer</b> and <b>receiver</b>. The proposer first decides how to divide <b>100 cents</b> between themself and a receiver. The receiver then has one opportunity to decide whether to accept or reject the proposer's allocation.</p>
+      <div class="instruction-figure-wrap">
+        <img class="instruction-figure" src="ultimatum-instructions.png" alt="Diagram showing the proposer and receiver roles, the proposed split, and the outcomes of accepting or rejecting.">
+      </div>
+      <p>You have been assigned to the role of <b>RECEIVER</b>.</p>
+      <p>A group of proposers has already participated in this study and made allocation decisions for 100 cents. We will randomly select one of these proposers and pair them with you for this task. On the next page, you will see the allocation proposed by this proposer. The proposal will show how much money would go to you and how much money would go to the proposer themself.</p>
+      <p>You will have one opportunity to decide whether to accept or reject this allocation.</p>
       <ul>
-        <li>If you accept, you and the other participant receive the amounts shown in the proposal.</li>
-        <li>If you reject, both you and the other participant receive 0 cents from this game.</li>
+        <li>If you accept, the 100-cent bonus will be divided between you and the proposer according to the proposer's allocation.</li>
+        <li>If you reject, this means that the two of you have not reached an agreement, and neither you nor the proposer will receive any part of the 100-cent bonus.</li>
       </ul>
-      <p>All participants receive a base payment of <b>$${BASE_PAYMENT_USD.toFixed(2)}</b> for completing the study. In addition, <b>${BONUS_DRAW_PERCENT}% of participants</b> will be randomly selected for real bonus payment. If you are selected, your decision will be matched with a proposal from the existing proposer database, and the outcome will be paid as a Prolific bonus.</p>
-      <p>Bonus payments will be processed within <b>two months</b> after data collection is complete.</p>
-      <p>Please read carefully and make your decision as if it could determine a real bonus for you and another participant.</p>
+      <p>You and the proposer will not know any personal information about each other. You will only have this one opportunity to make your decision.</p>
+      <p>In this study, <b>${BONUS_DRAW_PERCENT}% of receivers</b> will be randomly selected to have their decisions implemented for real payment. If you are selected, we will implement your decision exactly as specified above: the 100-cent bonus will be allocated between you and the matched proposer according to your choice, and the outcome will be paid as a Prolific bonus. Bonus payments will be processed within <b>two months</b> after data collection is complete.</p>
+      <p>Therefore, please consider the allocation carefully, because your decision may affect a real bonus for both you and another participant.</p>
     `, "Ultimatum Game Study", "instruction-shell"),
     choices: ["Continue"],
     data: { phase: "instructions", comprehension_attempt_number: comprehensionAttempts + 1 }
@@ -705,11 +711,29 @@ async function buildAndRunExperiment() {
     fullscreen_mode: true,
     message: `<div class="fullscreen-message">
       <h2>Ultimatum Game Study</h2>
+      <p>This study is a decision-making study conducted by Zhejiang University. The purpose of this study is to explore different human decision preferences.</p>
+      <p>All personal data collected in this study will be used for research purposes only and will not be used for any commercial purpose.</p>
       <p>This study must be completed on a desktop or laptop computer.</p>
       <p>Please enter fullscreen mode to begin. If you exit fullscreen before the study ends, the study will stop automatically.</p>
+      <label class="fullscreen-consent">
+        <input id="ethics-consent" type="checkbox">
+        <span>I agree to participate in this study.</span>
+      </label>
     </div>`,
     button_label: "Enter fullscreen and start",
     data: { phase: "fullscreen_start" },
+    on_load: function () {
+      const consent = document.getElementById("ethics-consent");
+      const button = document.querySelector("#jspsych-fullscreen-btn") || document.querySelector(".jspsych-btn");
+      if (consent && button) {
+        button.disabled = true;
+        button.classList.add("is-disabled");
+        consent.addEventListener("change", function () {
+          button.disabled = !consent.checked;
+          button.classList.toggle("is-disabled", !consent.checked);
+        });
+      }
+    },
     on_finish: function () {
       plannedFullscreenExit = false;
       fullscreenAbortArmed = true;
