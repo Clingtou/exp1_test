@@ -8,6 +8,7 @@ const PROLIFIC_COMPLETION_CODE = "REPLACE_WITH_PROLIFIC_COMPLETION_CODE";
 const BASE_PAYMENT_USD = 1.00;
 const BONUS_DRAW_PERCENT = 10;
 const RADIUS_MANIPULATION_RATIO = 1.3;
+const STUDY_TITLE = "Decision-Making Study";
 
 const YOU_ORANGE = "#f28e2b";
 const OTHER_BLUE = "#6ea8ff";
@@ -73,7 +74,7 @@ jsPsych.data.addProperties({
   timezone_offset_minutes: new Date().getTimezoneOffset()
 });
 
-function shellHtml(innerHtml, topTitle = "Ultimatum Game Study", extraClass = "") {
+function shellHtml(innerHtml, topTitle = STUDY_TITLE, extraClass = "") {
   return `
     <div class="study-shell ${extraClass}">
       <div class="qualtrics-topbar">${topTitle}</div>
@@ -93,7 +94,7 @@ function handleFullscreenChange() {
       <h2 class="intro-title">The study has ended.</h2>
       <p class="warning">You exited fullscreen mode during the study.</p>
       <p>Please return this study on Prolific. Do not submit a completion code.</p>
-    `, "Ultimatum Game Study", "abort-shell"));
+    `, STUDY_TITLE, "abort-shell"));
   }
 }
 
@@ -327,7 +328,7 @@ function instructionDiagramHtml() {
           </div>
           <div class="step-caption">Two roles.</div>
         </div>
-        <div class="diagram-arrow">→</div>
+        <div class="diagram-arrow">鈫?/div>
         <div class="diagram-step">
           <div class="step-number">2</div>
           <div class="proposal-card">
@@ -340,26 +341,26 @@ function instructionDiagramHtml() {
           </div>
           <div class="step-caption">The proposer decides how to divide 100 cents.</div>
         </div>
-        <div class="diagram-arrow">→</div>
+        <div class="diagram-arrow">鈫?/div>
         <div class="diagram-step">
           <div class="step-number">3</div>
           <div class="receiver-card">
             <div class="mini-caption">Receiver sees the<br>proposed split.</div>
-            <div class="mini-pie"><span>¢</span><span>¢</span></div>
+            <div class="mini-pie"><span>垄</span><span>垄</span></div>
             <div class="mini-caption">Receiver makes<br>one decision.</div>
-            <div class="diagram-choice accept-choice">✓ Accept</div>
-            <div class="diagram-choice reject-choice">✕ Reject</div>
+            <div class="diagram-choice accept-choice">鉁?Accept</div>
+            <div class="diagram-choice reject-choice">鉁?Reject</div>
           </div>
           <div class="step-caption">The receiver has one chance to decide.</div>
         </div>
-        <div class="diagram-arrow">→</div>
+        <div class="diagram-arrow">鈫?/div>
         <div class="diagram-step">
           <div class="step-number">4</div>
           <div class="outcome-card">
             <div class="outcome-title">Outcomes</div>
-            <div class="diagram-choice accept-choice">✓ Accept</div>
+            <div class="diagram-choice accept-choice">鉁?Accept</div>
             <div class="outcome-text">Both receive the proposed amounts.</div>
-            <div class="diagram-choice reject-choice">✕ Reject</div>
+            <div class="diagram-choice reject-choice">鉁?Reject</div>
             <div class="zero-row"><span>0</span><span>0</span></div>
             <div class="outcome-text">Both receive 0.</div>
           </div>
@@ -393,7 +394,7 @@ function instructionTrial() {
       <p>You and the proposer will not know any personal information about each other. You will only have this one opportunity to make your decision.</p>
       <p>In this study, <b>${BONUS_DRAW_PERCENT}% of receivers</b> will be randomly selected to have their decisions implemented for real payment. If you are selected, we will implement your decision exactly as specified above: the 100-cent bonus will be allocated between you and the matched proposer according to your choice, and the outcome will be paid as a Prolific bonus. Bonus payments will be processed within <b>two months</b> after data collection is complete.</p>
       <p>Therefore, please consider the allocation carefully, because your decision may affect a real bonus for both you and another participant.</p>
-    `, "Ultimatum Game Study", "instruction-shell"),
+    `, STUDY_TITLE, "instruction-shell"),
     choices: ["Continue"],
     data: { phase: "instructions", comprehension_attempt_number: comprehensionAttempts + 1 }
   };
@@ -529,8 +530,8 @@ function warningTrial() {
   return {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: shellHtml(`
-      <h2 class="intro-title">回答错误！</h2>
-      <p class="warning">请重新阅读指导语。</p>
+      <h2 class="intro-title">鍥炵瓟閿欒锛?/h2>
+      <p class="warning">璇烽噸鏂伴槄璇绘寚瀵艰銆?/p>
     `),
     choices: "NO_KEYS",
     trial_duration: 3000,
@@ -545,7 +546,7 @@ function exclusionTrial() {
       <h2 class="intro-title">The study has ended.</h2>
       <p class="warning">Based on your comprehension-check responses, you are not eligible to continue this study.</p>
       <p>Please return this study on Prolific. Do not submit a completion code.</p>
-    `, "Ultimatum Game Study", "abort-shell"),
+    `, STUDY_TITLE, "abort-shell"),
     choices: ["Exit"],
     data: { phase: "comprehension_exclusion" },
     on_finish: function () {
@@ -569,7 +570,7 @@ function decisionTrial(condition) {
         <button class="decision-button" type="button" data-choice="reject">Reject</button>
       </div>
     </div>
-  `, "Ultimatum Game Study", "stimulus-shell");
+  `, STUDY_TITLE, "stimulus-shell");
 
   return {
     type: jsPsychHtmlKeyboardResponse,
@@ -769,7 +770,7 @@ async function buildAndRunExperiment() {
     type: jsPsychFullscreen,
     fullscreen_mode: true,
     message: `<div class="fullscreen-message">
-      <h2>Ultimatum Game Study</h2>
+      <h2>${STUDY_TITLE}</h2>
       <p>This study is a decision-making study conducted by Zhejiang University. The purpose of this study is to explore different human decision preferences.</p>
       <p>All personal data collected in this study will be used for research purposes only and will not be used for any commercial purpose.</p>
       <p>This study must be completed on a desktop or laptop computer.</p>
@@ -851,3 +852,5 @@ async function buildAndRunExperiment() {
 }
 
 buildAndRunExperiment();
+
+
