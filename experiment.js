@@ -248,7 +248,10 @@ function roseChartHtml(condition, options = {}) {
       ? { label: "other", amount: condition.other, radius: otherRadius }
       : { label: "you", amount: condition.you, radius: youRadius };
 
-    cy = baseCy + (baseRadius * RADIUS_MANIPULATION_RATIO - lower.radius);
+    const fixedGroupBottom = compact
+      ? baseCy + baseRadius * RADIUS_MANIPULATION_RATIO + edgeGap + lineGap + amountTextHeight
+      : 676;
+    cy = fixedGroupBottom - lower.radius - edgeGap - lineGap - amountTextHeight;
     const upperY = cy - upper.radius - edgeGap - lineGap - amountTextHeight;
     const lowerY = cy + lower.radius + edgeGap;
     labelHtml = `
@@ -466,7 +469,7 @@ function comprehensionTrial(conditionInfo) {
   ];
 
   const html = shellHtml(`
-    <form id="comprehension-form">
+    <form id="comprehension-form" novalidate>
       <h2 class="intro-title">Comprehension Check</h2>
       <p class="muted">Please answer these questions before continuing.</p>
       ${questions.map(function (q) {
@@ -478,7 +481,7 @@ function comprehensionTrial(conditionInfo) {
               ${q.options.map(function (o) {
                 return `
                   <label class="single-choice-option">
-                    <input type="radio" name="${q.name}" value="${o.value}" required>
+                    <input type="radio" name="${q.name}" value="${o.value}">
                     <span>${o.label}</span>
                   </label>
                 `;
@@ -621,7 +624,7 @@ function scaleQuestionHtml(name, text, left, right) {
       <div class="radio-row" role="radiogroup" aria-label="${name}">
         ${[1,2,3,4,5,6,7].map(v => `
           <label class="radio-tile">
-            <input type="radio" name="${name}" value="${v}" required>
+            <input type="radio" name="${name}" value="${v}">
             <span>${v}</span>
           </label>
         `).join("")}
@@ -632,7 +635,7 @@ function scaleQuestionHtml(name, text, left, right) {
 
 function questionnaireTrial() {
   const html = shellHtml(`
-    <form id="post-form">
+    <form id="post-form" novalidate>
       <h2 class="intro-title">Follow-up Questions</h2>
       ${scaleQuestionHtml("fairness_7", "How fair do you think the proposal was?", "1 - Very unfair", "7 - Very fair")}
       ${scaleQuestionHtml("anger_7", "How angry did the proposal make you feel?", "1 - Not angry at all", "7 - Extremely angry")}
