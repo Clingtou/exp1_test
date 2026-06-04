@@ -221,12 +221,12 @@ function calloutTextHtml(x, y, label, amount, anchor = "middle") {
 function roseChartHtml(condition, options = {}) {
   const compact = options.compact === true;
   const cx = 390;
-  const baseCy = compact ? 250 : 350;
-  const baseRadius = compact ? 108 : 142;
+  const baseCy = compact ? 250 : 382;
+  const baseRadius = compact ? 108 : 124;
   const edgeGap = 24;
   const lineGap = 40;
   const amountTextHeight = 25;
-  const viewBoxHeight = compact ? 500 : 620;
+  const viewBoxHeight = compact ? 500 : 700;
   const youRadius = baseRadius * condition.you_radius_multiplier;
   const otherRadius = baseRadius * condition.other_radius_multiplier;
   let cy = baseCy;
@@ -380,7 +380,9 @@ function instructionTrial() {
       <h2 class="intro-title">Instructions</h2>
       <p>In this study, you will take part in a short economic decision task. You will receive a base payment of <b>$${BASE_PAYMENT_USD.toFixed(2)}</b> for completing the study carefully.</p>
       <p>There are two roles in this task: <b>proposer</b> and <b>receiver</b>. The proposer first decides how to divide <b>100 cents</b> between themself and a receiver. The receiver then has one opportunity to decide whether to accept or reject the proposer's allocation.</p>
-      ${instructionDiagramHtml()}
+      <div class="instruction-flow-wrap">
+        <img class="instruction-flow-image" src="instruction-flow.png" alt="Diagram showing the ultimatum game roles, proposal, receiver decision, and outcomes.">
+      </div>
       <p>You have been assigned to the role of <b>RECEIVER</b>.</p>
       <p>A group of proposers has already participated in this study and made allocation decisions for 100 cents. We will randomly select one of these proposers and pair them with you for this task. On the next page, you will see the allocation proposed by this proposer. The proposal will show how much money would go to you and how much money would go to the proposer themself.</p>
       <p>You will have one opportunity to decide whether to accept or reject this allocation.</p>
