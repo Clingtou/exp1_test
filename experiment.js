@@ -221,12 +221,12 @@ function calloutTextHtml(x, y, label, amount, anchor = "middle") {
 function roseChartHtml(condition, options = {}) {
   const compact = options.compact === true;
   const cx = 390;
-  const baseCy = compact ? 280 : 382;
-  const baseRadius = compact ? 92 : 124;
+  const baseCy = compact ? 250 : 350;
+  const baseRadius = compact ? 108 : 142;
   const edgeGap = 24;
   const lineGap = 40;
   const amountTextHeight = 25;
-  const viewBoxHeight = compact ? 520 : 700;
+  const viewBoxHeight = compact ? 500 : 620;
   const youRadius = baseRadius * condition.you_radius_multiplier;
   const otherRadius = baseRadius * condition.other_radius_multiplier;
   let cy = baseCy;
@@ -312,6 +312,67 @@ function desktopGateTrial() {
   };
 }
 
+function instructionDiagramHtml() {
+  return `
+    <div class="instruction-diagram" aria-label="Ultimatum game flow diagram">
+      <div class="diagram-steps">
+        <div class="diagram-step">
+          <div class="step-number">1</div>
+          <div class="role-card">
+            <div class="role-pair">
+              <div class="person proposer-person"></div>
+              <div class="person receiver-person"></div>
+            </div>
+            <div class="role-labels"><span>Proposer</span><span>Receiver</span></div>
+          </div>
+          <div class="step-caption">Two roles.</div>
+        </div>
+        <div class="diagram-arrow">→</div>
+        <div class="diagram-step">
+          <div class="step-number">2</div>
+          <div class="proposal-card">
+            <div class="bonus-circle">100<br><span>cents<br>bonus</span></div>
+            <div class="mini-caption">Proposer decides<br>how to split.</div>
+            <div class="mini-split">
+              <span>You</span>
+              <span>Proposer</span>
+            </div>
+          </div>
+          <div class="step-caption">The proposer decides how to divide 100 cents.</div>
+        </div>
+        <div class="diagram-arrow">→</div>
+        <div class="diagram-step">
+          <div class="step-number">3</div>
+          <div class="receiver-card">
+            <div class="mini-caption">Receiver sees the<br>proposed split.</div>
+            <div class="mini-pie"><span>¢</span><span>¢</span></div>
+            <div class="mini-caption">Receiver makes<br>one decision.</div>
+            <div class="diagram-choice accept-choice">✓ Accept</div>
+            <div class="diagram-choice reject-choice">✕ Reject</div>
+          </div>
+          <div class="step-caption">The receiver has one chance to decide.</div>
+        </div>
+        <div class="diagram-arrow">→</div>
+        <div class="diagram-step">
+          <div class="step-number">4</div>
+          <div class="outcome-card">
+            <div class="outcome-title">Outcomes</div>
+            <div class="diagram-choice accept-choice">✓ Accept</div>
+            <div class="outcome-text">Both receive the proposed amounts.</div>
+            <div class="diagram-choice reject-choice">✕ Reject</div>
+            <div class="zero-row"><span>0</span><span>0</span></div>
+            <div class="outcome-text">Both receive 0.</div>
+          </div>
+        </div>
+      </div>
+      <div class="diagram-notes">
+        <div>You and the proposer do not know each other's personal information.</div>
+        <div>${BONUS_DRAW_PERCENT}% of receivers are randomly selected for real bonus payment.</div>
+      </div>
+    </div>
+  `;
+}
+
 function instructionTrial() {
   return {
     type: jsPsychHtmlButtonResponse,
@@ -319,9 +380,7 @@ function instructionTrial() {
       <h2 class="intro-title">Instructions</h2>
       <p>In this study, you will take part in a short economic decision task. You will receive a base payment of <b>$${BASE_PAYMENT_USD.toFixed(2)}</b> for completing the study carefully.</p>
       <p>There are two roles in this task: <b>proposer</b> and <b>receiver</b>. The proposer first decides how to divide <b>100 cents</b> between themself and a receiver. The receiver then has one opportunity to decide whether to accept or reject the proposer's allocation.</p>
-      <div class="instruction-figure-wrap">
-        <img class="instruction-figure" src="ultimatum-instructions.png" alt="Diagram showing the proposer and receiver roles, the proposed split, and the outcomes of accepting or rejecting.">
-      </div>
+      ${instructionDiagramHtml()}
       <p>You have been assigned to the role of <b>RECEIVER</b>.</p>
       <p>A group of proposers has already participated in this study and made allocation decisions for 100 cents. We will randomly select one of these proposers and pair them with you for this task. On the next page, you will see the allocation proposed by this proposer. The proposal will show how much money would go to you and how much money would go to the proposer themself.</p>
       <p>You will have one opportunity to decide whether to accept or reject this allocation.</p>
@@ -356,7 +415,6 @@ function comprehensionTrial(conditionInfo) {
       exampleHtml: `
           <div class="comprehension-example">
           <div class="example-chart">${exampleRoseChartHtml(conditionInfo)}</div>
-          <div class="example-note"><b>Example proposal:</b> you receive 1 cent; other receives 99 cents.</div>
         </div>
       `,
       options: [
@@ -372,7 +430,6 @@ function comprehensionTrial(conditionInfo) {
       exampleHtml: `
         <div class="comprehension-example">
           <div class="example-chart">${exampleRoseChartHtml(conditionInfo)}</div>
-          <div class="example-note"><b>Example proposal:</b> you receive 1 cent; other receives 99 cents.</div>
         </div>
       `,
       options: [
