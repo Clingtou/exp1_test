@@ -1211,12 +1211,12 @@ async function buildAndRunExperiment() {
 
   timeline.push({
     type: jsPsychPreload,
-    images: ["../ModifiedMullerLyer.png"],
+    images: ["ModifiedMullerLyer.png"],
     continue_after_error: true,
     data: { phase: "preload" }
   });
 
-  timeline.push(humanVerificationTrial("../ModifiedMullerLyer.png"));
+  timeline.push(humanVerificationTrial("ModifiedMullerLyer.png"));
 
   timeline.push({
     type: jsPsychFullscreen,
