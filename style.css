@@ -348,17 +348,17 @@ li {
 }
 
 .instruction-flow-wrap {
-  margin: 12px 0 14px 0;
+  margin: 12px 0 24px 0;
   display: flex;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .instruction-flow-image {
   width: min(100%, 860px);
   height: auto;
   display: block;
-  margin: -38px 0 -10px 0;
+  margin: 0;
 }
 
 .required-note {
@@ -376,12 +376,37 @@ li {
   margin-top: 8px;
 }
 
+.stage-message {
+  width: min(780px, calc(100vw - 72px));
+  min-height: 100vh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  color: var(--text);
+  box-sizing: border-box;
+  padding-bottom: 11vh;
+}
+
+.stage-message h2 {
+  font-size: 34px;
+  line-height: 1.25;
+  margin: 0 0 16px 0;
+}
+
+.stage-message p {
+  font-size: 23px;
+  line-height: 1.55;
+  margin: 8px 0;
+}
+
 .study-shell.stimulus-shell .qualtrics-card {
   padding: 30px 52px 28px 52px;
 }
 
 .study-shell.stimulus-shell {
-  width: min(1160px, calc(100vw - 56px));
+  width: min(1260px, calc(100vw - 40px));
   margin: 14px auto;
 }
 
@@ -407,6 +432,10 @@ li {
   margin: 0 0 2px 0;
 }
 
+.choice-shell .offer-title {
+  margin-top: 24px;
+}
+
 .rose-wrap {
   display: flex;
   justify-content: center;
@@ -414,6 +443,41 @@ li {
   min-height: 500px;
   margin-top: -10px;
   width: 100%;
+}
+
+.pretest-rose-wrap {
+  min-height: 500px;
+  margin-top: -10px;
+}
+
+.pretest-decision-rose-wrap {
+  min-height: 500px;
+  margin-top: -10px;
+}
+
+.pretest-scale-panel {
+  width: min(760px, 100%);
+}
+
+.pretest-scale-panel .form-question {
+  margin: 16px 0 20px 0;
+  padding-bottom: 18px;
+}
+
+.pretest-scale-panel .question-text {
+  font-size: 20px;
+  line-height: 1.35;
+}
+
+.recorded-blank {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  font-size: 26px;
+  font-weight: 700;
+  text-align: center;
 }
 
 .rose-chart {
@@ -455,6 +519,13 @@ li {
   width: 100%;
 }
 
+.vertical-decision-buttons {
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: -6px;
+}
+
 .decision-button {
   width: 230px;
   border: 2px solid #aab4c1;
@@ -465,6 +536,12 @@ li {
   font-size: 25px;
   font-weight: 700;
   cursor: pointer;
+}
+
+.vertical-decision-buttons .decision-button {
+  width: 260px;
+  padding: 14px 18px;
+  font-size: 24px;
 }
 
 .decision-button:hover {
@@ -499,7 +576,7 @@ li {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 28px;
+  margin-top: 18px;
   width: 100%;
 }
 
@@ -509,7 +586,7 @@ li {
 
 .selected-choice-text {
   color: var(--text);
-  font-size: 25px;
+  font-size: 23px;
   line-height: 1.35;
   text-align: center;
 }
@@ -519,11 +596,18 @@ li {
   font-weight: 700;
 }
 
+.selected-choice-note {
+  color: var(--muted);
+  font-size: 17px;
+  font-weight: 400;
+  margin-top: 6px;
+}
+
 .confirm-choice-wrap {
   position: relative;
   display: flex;
   justify-content: center;
-  margin-top: 24px;
+  margin-top: 14px;
 }
 
 .confirm-choice-button {
@@ -532,8 +616,8 @@ li {
   background: var(--blue);
   color: #fff;
   border-radius: 6px;
-  padding: 18px 20px;
-  font-size: 25px;
+  padding: 14px 20px;
+  font-size: 23px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -612,6 +696,18 @@ li {
   color: #fff;
 }
 
+.lowest-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(70px, 1fr));
+  gap: 10px;
+  max-width: 620px;
+  margin-top: 46px;
+}
+
+.lowest-choice {
+  height: 50px;
+}
+
 .text-area {
   width: min(720px, 100%);
   min-height: 110px;
@@ -652,6 +748,15 @@ li {
   box-sizing: border-box;
 }
 
+.other-text-input {
+  flex: 1;
+  min-width: 180px;
+  border: 1px solid #aab4c1;
+  border-radius: 4px;
+  font-size: 17px;
+  padding: 8px 10px;
+}
+
 .saving-card {
   text-align: center;
   padding: 48px 36px;
@@ -685,6 +790,10 @@ li {
 
   .rose-wrap {
     min-height: auto;
+  }
+
+  .lowest-choice-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .decision-buttons {

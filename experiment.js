@@ -1,10 +1,10 @@
 /*
-  Experiment 1: Ultimatum game receiver decision with polar-area pie displays.
+  Pretest: Ultimatum game receiver proposal ratings with equal-radius pie displays.
   Replace DATAPIPE_EXPERIMENT_ID and PROLIFIC_COMPLETION_CODE before launching on Prolific.
 */
 
-const DATAPIPE_EXPERIMENT_ID = "HJEtzT3h5x8N";
-const PROLIFIC_COMPLETION_CODE = "REPLACE_WITH_PROLIFIC_COMPLETION_CODE";
+const DATAPIPE_EXPERIMENT_ID = "F9OQa1bKo1u6";
+const PROLIFIC_COMPLETION_CODE = "CR3Q5CHT";
 const BASE_PAYMENT_USD = 1.00;
 const BONUS_DRAW_PERCENT = 10;
 const RADIUS_MANIPULATION_RATIO = 1.3;
@@ -27,6 +27,8 @@ let plannedFullscreenExit = false;
 let comprehensionAttempts = 0;
 let comprehensionPassed = false;
 let excludedForComprehension = false;
+let dataSavedToDatapipe = false;
+let assignedConditionInfo = null;
 
 function currentFullscreenElement() {
   return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || null;
@@ -36,9 +38,9 @@ const prolific_pid = jsPsych.data.getURLVariable("PROLIFIC_PID") || "missing";
 const study_id = jsPsych.data.getURLVariable("STUDY_ID") || "missing";
 const session_id = jsPsych.data.getURLVariable("SESSION_ID") || jsPsych.randomization.randomID(12);
 const subject_id = prolific_pid !== "missing" ? prolific_pid : jsPsych.randomization.randomID(10);
-const data_filename = `${subject_id}_${session_id}_${Date.now()}_ultimatum_exp1.csv`;
+const data_filename = `${subject_id}_${session_id}_${Date.now()}_ultimatum_pretest.csv`;
 const preview_mode = jsPsych.data.getURLVariable("preview") === "1" || prolific_pid === "missing";
-const studyLockKey = `ultimatum_exp1_status_${prolific_pid}_${study_id}`;
+const studyLockKey = `ultimatum_pretest_status_${prolific_pid}_${study_id}`;
 
 function desktopCheck() {
   const ua = navigator.userAgent || "";
@@ -167,46 +169,35 @@ document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
 document.addEventListener("mozfullscreenchange", handleFullscreenChange);
 document.addEventListener("MSFullscreenChange", handleFullscreenChange);
 
-const splits = [
-  { split_id: "you10_other90", you: 10, other: 90 },
-  { split_id: "you20_other80", you: 20, other: 80 },
-  { split_id: "you30_other70", you: 30, other: 70 },
-  { split_id: "you40_other60", you: 40, other: 60 },
-  { split_id: "you50_other50", you: 50, other: 50 }
-];
-
-const areaConditions = [
-  { area_condition: "equal_radius", you_radius_multiplier: 1, other_radius_multiplier: 1 },
-  { area_condition: "you_larger", you_radius_multiplier: RADIUS_MANIPULATION_RATIO, other_radius_multiplier: 1 },
-  { area_condition: "other_larger", you_radius_multiplier: 1, other_radius_multiplier: RADIUS_MANIPULATION_RATIO }
+const pretestSplits = [
+  { split_id: "you42_other58", you: 42, other: 58 },
+  { split_id: "you34_other66", you: 34, other: 66 },
+  { split_id: "you26_other74", you: 26, other: 74 }
 ];
 
 const positions = [
-  { position_condition: "top", center_angle_degrees: 0 },
-  { position_condition: "right", center_angle_degrees: 90 },
-  { position_condition: "bottom", center_angle_degrees: 180 },
-  { position_condition: "left", center_angle_degrees: 270 }
+  { position_condition: "right", center_angle_degrees: 90 }
 ];
 
-const colorBalances = [
-  { color_balance: "you_orange_other_blue", you_color: YOU_ORANGE, other_color: OTHER_BLUE },
-  { color_balance: "you_blue_other_orange", you_color: OTHER_BLUE, other_color: YOU_ORANGE }
+const areaConditions = [
+  { area_condition: "you_larger", you_radius_multiplier: RADIUS_MANIPULATION_RATIO, other_radius_multiplier: 1 },
+  { area_condition: "equal_radius", you_radius_multiplier: 1, other_radius_multiplier: 1 }
 ];
 
 function buildConditionTable() {
   const rows = [];
-  areaConditions.forEach(function (area) {
-    splits.forEach(function (split) {
-      positions.forEach(function (position) {
-        colorBalances.forEach(function (colors) {
-          rows.push({
-            condition_index: rows.length,
-            condition_label: `${area.area_condition}_${split.split_id}_${position.position_condition}_${colors.color_balance}`,
-            ...area,
-            ...split,
-            ...position,
-            ...colors
-          });
+  positions.forEach(function (position) {
+    areaConditions.forEach(function (area) {
+      pretestSplits.forEach(function (split) {
+        rows.push({
+          condition_index: rows.length,
+          condition_label: `${area.area_condition}_${position.position_condition}_${split.split_id}_you_blue_other_orange`,
+          color_balance: "you_blue_other_orange",
+          you_color: OTHER_BLUE,
+          other_color: YOU_ORANGE,
+          ...area,
+          ...position,
+          ...split
         });
       });
     });
@@ -249,6 +240,49 @@ async function getDatapipeCondition() {
       source: "fallback_datapipe_error"
     };
   }
+}
+
+function getAssignedConditionInfo() {
+  if (!assignedConditionInfo) {
+    throw new Error("Condition has not been assigned yet.");
+  }
+  return assignedConditionInfo;
+}
+
+function assignCondition(conditionNumber, source) {
+  assignedConditionInfo = conditionTable[conditionNumber];
+  jsPsych.data.addProperties({
+    datapipe_condition_source: source,
+    condition_index: assignedConditionInfo.condition_index,
+    condition_label: assignedConditionInfo.condition_label,
+    assigned_split_id: assignedConditionInfo.split_id,
+    assigned_you_cents: assignedConditionInfo.you,
+    assigned_other_cents: assignedConditionInfo.other,
+    assigned_area_condition: assignedConditionInfo.area_condition,
+    assigned_position_condition: assignedConditionInfo.position_condition,
+    assigned_color_balance: assignedConditionInfo.color_balance
+  });
+  return assignedConditionInfo;
+}
+
+function conditionAssignmentTrial() {
+  return {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div class="study-shell"><div class="qualtrics-card standalone saving-card"><h2>Loading study...</h2><p>Please do not close this page.</p></div></div>`,
+    choices: "NO_KEYS",
+    data: { phase: "condition_assignment" },
+    on_load: async function () {
+      const assignmentStart = performance.now();
+      const { conditionNumber, source } = await getDatapipeCondition();
+      const conditionInfo = assignCondition(conditionNumber, source);
+      jsPsych.finishTrial({
+        datapipe_condition_source: source,
+        condition_index: conditionInfo.condition_index,
+        condition_label: conditionInfo.condition_label,
+        condition_assignment_rt: Math.round(performance.now() - assignmentStart)
+      });
+    }
+  };
 }
 
 function polarToCartesian(cx, cy, radius, angleDegrees) {
@@ -314,14 +348,19 @@ function mergeBounds(first, second) {
 
 function calloutTextHtml(x, y, label, amount, anchor = "middle") {
   const lineGap = 40;
+  const displayLabel = participantLabel(label);
   return `
     <g class="callout-group">
       <text class="callout-text" x="${x}" y="${y}" text-anchor="${anchor}" dominant-baseline="hanging">
-        <tspan class="callout-person" x="${x}" y="${y}">${label}</tspan>
+        <tspan class="callout-person" x="${x}" y="${y}">${displayLabel}</tspan>
         <tspan class="callout-amount" x="${x}" y="${y + lineGap}">${amount} cents</tspan>
       </text>
     </g>
   `;
+}
+
+function participantLabel(label) {
+  return label === "other" ? "proposer" : label;
 }
 
 function roseChartHtml(condition, options = {}) {
@@ -407,8 +446,8 @@ function roseChartHtml(condition, options = {}) {
 
 function exampleRoseChartHtml(condition) {
   return roseChartHtml({
-    you: 45,
-    other: 55,
+    you: 50,
+    other: 50,
     you_radius_multiplier: 1,
     other_radius_multiplier: 1,
     position_condition: condition.position_condition,
@@ -416,6 +455,12 @@ function exampleRoseChartHtml(condition) {
     you_color: condition.you_color,
     other_color: condition.other_color
   }, { compact: true });
+}
+
+function instructionFlowImagePath(condition) {
+  return condition.color_balance === "you_orange_other_blue"
+    ? "instruction-flow_proposerblue.png"
+    : "instruction-flow_proposerorange.png";
 }
 
 function collectFormData(form) {
@@ -622,70 +667,72 @@ function instructionDiagramHtml() {
 }
 
 function instructionTrial() {
-  return {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: shellHtml(`
+  const renderHtml = function () {
+    const condition = getAssignedConditionInfo();
+    const instructionImage = instructionFlowImagePath(condition);
+    return shellHtml(`
       <h2 class="intro-title">Instructions</h2>
-      <p>In this study, you will complete a short economic decision-making task. Please read the instructions carefully. Your decisions may affect bonus payments for you and another participant. You will receive a base payment of <b>$${BASE_PAYMENT_USD.toFixed(2)}</b> for completing the study carefully.</p>
-      <p>There are two roles in this task: <span class="doc-red">proposer</span> and <span class="doc-red">receiver</span>. The proposer first decides how to divide <span class="doc-red">100 cents</span> between themself and a receiver. The receiver then has one opportunity to decide whether to accept or reject the proposer's allocation.</p>
+      <p>In this study, you will complete a short economic decision-making task. Please read the instructions carefully. Your decision may affect bonus payments for you and another participant. You will receive a base payment of <span class="doc-red">$${BASE_PAYMENT_USD.toFixed(2)}</span> for completing the study carefully.</p>
+      <p>There are two roles in this task: <span class="doc-red">proposer</span> and <span class="doc-red">receiver</span>. The proposer first decides how to divide <span class="doc-red">100 cents</span> between themself and a receiver. The receiver then has <span class="doc-red">one opportunity</span> to decide whether to <span class="doc-red">accept</span> or <span class="doc-red">reject</span> the proposer's allocation.</p>
       <div class="instruction-flow-wrap">
-        <img class="instruction-flow-image" src="instruction-flow.png" alt="Diagram showing the ultimatum game roles, proposal, receiver decision, and outcomes.">
+        <img class="instruction-flow-image" src="${instructionImage}" alt="Diagram showing the ultimatum game roles, proposal, receiver decision, and outcomes.">
       </div>
       <p>You have been assigned to the role of <span class="doc-red">RECEIVER</span>.</p>
-      <p>A group of proposers has already participated in this study and made allocation decisions for 100 cents. For this task, one proposal will be randomly selected from this proposer database and shown to you. The proposal will show how much money would go to you and how much money would go to the proposer. The numerical amounts shown in the proposal determine the bonus outcome.</p>
-      <p>You will have one opportunity to decide whether to accept or reject this allocation.</p>
-      <ul>
-        <li>If you <span class="doc-red">accept</span>, the 100-cent bonus will be divided between you and the proposer according to the proposer's allocation.</li>
-        <li>If you <span class="doc-red">reject</span>, both you and the proposer receive 0 cents from this task.</li>
-      </ul>
-      <p>You and the proposer will not know any personal information about each other. You will only have this one opportunity to make your decision.</p>
-      <p>After data collection is complete, <span class="doc-red">${BONUS_DRAW_PERCENT}%</span> of receivers will be randomly selected for real bonus payment. If you are selected, the proposal shown to you and your accept/reject decision will be used to determine the bonus. The outcome will be paid as a Prolific bonus. Bonus payments will be processed within two months after data collection is complete.</p>
-      <p>Therefore, please consider the allocation carefully, because your decision may affect a real bonus for both you and another participant.</p>
-    `, STUDY_TITLE, "instruction-shell"),
+      <p>A group of proposers has already participated in this study and made allocation decisions for <span class="doc-red">100 cents</span>. For this task, one proposal will be randomly selected from this proposer database and shown to you. The proposal will show how many cents would go to you and how many cents would go to the proposer. The numerical amounts shown in the proposal determine how the <span class="doc-red">100 cents</span> would be divided if you <span class="doc-red">accept</span>.</p>
+      <p>You will have <span class="doc-red">one opportunity</span> to decide whether to <span class="doc-red">accept</span> or <span class="doc-red">reject</span> this proposal. Once you confirm your decision, you cannot change it.</p>
+      <p>If you <span class="doc-red">accept</span>, the 100-cent bonus will be divided between you and the proposer according to the proposer's allocation.<br>If you <span class="doc-red">reject</span>, both you and the proposer receive 0 cents from this proposal.</p>
+      <p>You and the proposer will not know any personal information about each other.</p>
+      <p>After data collection is complete, <span class="doc-red">${BONUS_DRAW_PERCENT}%</span> of receivers will be randomly selected for <span class="doc-red">real bonus payment</span>. If you are selected, the proposal shown to you and your actual accept/reject decision will be used to determine the bonus for you and the corresponding proposer. The bonus will be paid as a <strong>Prolific bonus</strong>. Bonus payments will be processed within two months after data collection is complete.</p>
+      <p>Therefore, please consider the proposal carefully, because your decision may affect a real bonus for both you and another participant.</p>
+    `, STUDY_TITLE, "instruction-shell");
+  };
+  return {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: renderHtml,
     choices: ["Continue"],
     data: { phase: "instructions" }
   };
 }
 
-function comprehensionTrial(conditionInfo) {
-  const questions = [
+function buildComprehensionQuestions(conditionInfo) {
+  return [
     {
       name: "role",
       text: "1. What role will you have in this study?",
       options: [
-        { value: "receiver", label: "Receiver" },
-        { value: "proposer", label: "Proposer" },
-        { value: "observer", label: "Observer" }
+        { value: "receiver_decision", label: "You will be the receiver and decide whether to accept or reject a proposal made by a proposer." },
+        { value: "proposer_divide", label: "You will be the proposer and decide how to split the money between yourself and another participant." },
+        { value: "observer", label: "You will be an observer and evaluate a proposal and a choice." }
       ],
-      correct: "receiver"
+      correct: "receiver_decision"
     },
     {
       name: "accept",
-      text: "2. Example: the proposal gives you 45 cents and gives the other participant 55 cents. What happens if you accept this proposal?",
+      text: "2. Suppose this proposal is selected for bonus payment: the corresponding proposer gives you 50 cents and keeps 50 cents for themself. What happens if you accept this proposal?",
       exampleHtml: `
           <div class="comprehension-example">
           <div class="example-chart">${exampleRoseChartHtml(conditionInfo)}</div>
         </div>
       `,
       options: [
-        { value: "shown_amounts", label: "You receive 45 cents, and the other participant receives 55 cents." },
-        { value: "both_zero", label: "Both participants receive 0 cents from the game." },
+        { value: "shown_amounts", label: "You receive 50 cents, and the corresponding proposer receives 50 cents." },
+        { value: "both_zero", label: "Both you and the corresponding proposer receive 0 cents from the proposal." },
         { value: "you_all", label: "You receive all 100 cents." }
       ],
       correct: "shown_amounts"
     },
     {
       name: "reject",
-      text: "3. Example: the proposal gives you 45 cents and gives the other participant 55 cents. What happens if you reject this proposal?",
+      text: "3. Suppose this proposal is selected for bonus payment: the corresponding proposer gives you 50 cents and keeps 50 cents for themself. What happens if you reject this proposal?",
       exampleHtml: `
         <div class="comprehension-example">
           <div class="example-chart">${exampleRoseChartHtml(conditionInfo)}</div>
         </div>
       `,
       options: [
-        { value: "shown_amounts", label: "You receive 45 cents, and the other participant receives 55 cents." },
-        { value: "both_zero", label: "Both participants receive 0 cents from the game." },
-        { value: "other_all", label: "The other participant receives all 100 cents." }
+        { value: "shown_amounts", label: "You receive 50 cents, and the corresponding proposer receives 50 cents." },
+        { value: "both_zero", label: "Both you and the corresponding proposer receive 0 cents from the proposal." },
+        { value: "you_all", label: "You receive all 100 cents." }
       ],
       correct: "both_zero"
     },
@@ -693,25 +740,31 @@ function comprehensionTrial(conditionInfo) {
       name: "bonus",
       text: "4. How are bonus outcomes determined?",
       options: [
-        { value: "ten_percent_real", label: "10% of receivers are randomly selected. For selected receivers, the bonus will be allocated according to the receiver's decision and paid as a Prolific bonus." },
-        { value: "everyone_real", label: "Every receiver receives the game outcome as a bonus." },
-        { value: "no_real_bonus", label: "The game is hypothetical and no bonuses can be paid." }
+        { value: "ten_percent_real", label: "10% of receivers are randomly selected. If selected, the receiver and the corresponding proposer will be paid based on the proposal and the receiver's decision." },
+        { value: "everyone_real", label: "Every receiver and proposer will be paid based on every possible proposal." },
+        { value: "no_real_bonus", label: "The game is hypothetical, and no bonuses can be paid." }
       ],
       correct: "ten_percent_real"
     },
     {
       name: "total",
-      text: "5. How much money is divided in the game proposal?",
+      text: "5. How much money is divided in the proposal?",
       options: [
-        { value: "100_cents", label: "100 cents" },
-        { value: "10_dollars", label: "10 dollars" },
-        { value: "unknown", label: "The amount is not specified" }
+        { value: "100_cents", label: "100 cents." },
+        { value: "100_dollars", label: "100 dollars." },
+        { value: "unknown", label: "The amount is not specified." }
       ],
       correct: "100_cents"
     }
   ];
 
-  const html = shellHtml(`
+}
+
+function comprehensionTrial() {
+  let questions = [];
+  const renderHtml = function () {
+    questions = buildComprehensionQuestions(getAssignedConditionInfo());
+    return shellHtml(`
     <form id="comprehension-form" novalidate>
       <h2 class="intro-title">Comprehension Check</h2>
       <p class="muted">Please answer the following questions to make sure you understand the rules.</p>
@@ -738,10 +791,11 @@ function comprehensionTrial(conditionInfo) {
       <div id="comprehension-required" class="required-note">Please answer all questions before continuing.</div>
     </form>
   `);
+  };
 
   return {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: html,
+    stimulus: renderHtml,
     choices: "NO_KEYS",
     data: { phase: "comprehension_check" },
     on_load: function () {
@@ -825,48 +879,74 @@ function exclusionTrial() {
   };
 }
 
-function decisionTrial(condition) {
-  const html = shellHtml(`
-    <div class="stimulus-content">
-      <div class="offer-title">The other participant proposed this allocation of 100 cents.</div>
+function stageMessageTrial(stage) {
+  return {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+      <div class="stage-message">
+        <h2>Preparing Your Decision</h2>
+        <p>A proposal is being selected from the proposer database. Please wait...</p>
+      </div>
+    `,
+    choices: "NO_KEYS",
+    trial_duration: 2000,
+    data: { phase: "preparing_decision" }
+  };
+}
+
+function proposalDecisionTrial() {
+  const trialNumber = 1;
+  const renderHtml = function () {
+    const condition = getAssignedConditionInfo();
+    return shellHtml(`
+    <div class="stimulus-content pretest-decision-content">
+      <div class="offer-title">The proposer made the following allocation of 100 cents.</div>
       <div class="offer-subtitle">
-        This is your <span class="doc-red">actual decision</span>. Please decide whether to accept or reject this proposal.<br>
+        This is your <span class="doc-red">actual decision</span> for this proposal. Please decide whether to accept or reject it.<br>
         You can submit this decision <span class="doc-red">only once</span>. Please consider the proposal carefully before confirming your choice.
       </div>
-      <div class="rose-wrap">${roseChartHtml(condition)}</div>
-      <div class="decision-buttons">
+      <div class="rose-wrap pretest-decision-rose-wrap">${roseChartHtml(condition)}</div>
+      <div class="decision-buttons vertical-decision-buttons">
         <button class="decision-button" type="button" data-choice="accept">Accept</button>
         <button class="decision-button" type="button" data-choice="reject">Reject</button>
       </div>
       <div id="decision-confirm-panel" class="decision-confirm-panel" hidden>
         <div id="selected-choice-text" class="selected-choice-text"></div>
         <div class="confirm-choice-wrap">
-          <div class="confirm-tooltip">Once confirmed, your decision cannot be changed.</div>
           <button id="confirm-choice-button" class="confirm-choice-button" type="button">Confirm choice</button>
         </div>
       </div>
     </div>
-  `, STUDY_TITLE, "stimulus-shell");
+  `, "Actual Decision", "stimulus-shell choice-shell");
+  };
 
   return {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: html,
+    stimulus: renderHtml,
     choices: "NO_KEYS",
     data: {
-      phase: "ultimatum_decision",
-      condition_index: condition.condition_index,
-      condition_label: condition.condition_label,
-      split_id: condition.split_id,
-      you_cents: condition.you,
-      other_cents: condition.other,
-      area_condition: condition.area_condition,
-      you_radius_multiplier: condition.you_radius_multiplier,
-      other_radius_multiplier: condition.other_radius_multiplier,
-      position_condition: condition.position_condition,
-      center_angle_degrees: condition.center_angle_degrees,
-      color_balance: condition.color_balance,
-      you_color: condition.you_color,
-      other_color: condition.other_color
+      phase: "pretest_choice",
+      pretest_trial_number: trialNumber
+    },
+    on_start: function (trial) {
+      const condition = getAssignedConditionInfo();
+      trial.data = {
+        ...trial.data,
+        condition_index: condition.condition_index,
+        condition_label: condition.condition_label,
+        area_condition: condition.area_condition,
+        you_radius_multiplier: condition.you_radius_multiplier,
+        other_radius_multiplier: condition.other_radius_multiplier,
+        position_condition: condition.position_condition,
+        center_angle_degrees: condition.center_angle_degrees,
+        color_balance: condition.color_balance,
+        you_color: condition.you_color,
+        other_color: condition.other_color,
+        split_id: condition.split_id,
+        you_cents: condition.you,
+        other_cents: condition.other,
+        amount_difference_cents: condition.other - condition.you
+      };
     },
     on_load: function () {
       const pageStart = performance.now();
@@ -895,7 +975,10 @@ function decisionTrial(condition) {
           });
           button.classList.add("selected");
           button.innerHTML = `<span class="decision-check" aria-hidden="true">&#10003;</span>${choice === "accept" ? "Accept" : "Reject"}`;
-          selectedText.innerHTML = `You selected: <strong>${choice === "accept" ? "Accept" : "Reject"}</strong>.`;
+          selectedText.innerHTML = `
+            <div>You selected: <strong>${choice === "accept" ? "Accept" : "Reject"}</strong>.</div>
+            <div class="selected-choice-note">Once confirmed, your decision cannot be changed.</div>
+          `;
           confirmPanel.hidden = false;
           confirmPanel.scrollIntoView({ block: "nearest", behavior: "smooth" });
         });
@@ -916,6 +999,16 @@ function decisionTrial(condition) {
         });
       });
     }
+  };
+}
+
+function recordedBlankTrial() {
+  return {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<div class="recorded-blank">Your decision has been recorded.</div>`,
+    choices: "NO_KEYS",
+    trial_duration: 1000,
+    data: { phase: "response_recorded_blank" }
   };
 }
 
@@ -941,8 +1034,7 @@ function postScaleTrial(questions, pageNumber) {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: shellHtml(`
       <form id="post-form" novalidate>
-        <h2 class="intro-title">Follow-up Questions</h2>
-        <p class="muted post-instruction">There are no right or wrong answers. Please answer based on how you feel.</p>
+        <h2 class="intro-title">Task Questions</h2>
         ${questions.map(q => scaleQuestionHtml(q.name, q.text, q.left, q.right)).join("")}
         <button type="submit" class="form-submit">Continue</button>
         <div id="post-required" class="required-note">Please answer all questions before continuing.</div>
@@ -991,8 +1083,7 @@ function postRecallTrial() {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: shellHtml(`
       <form id="post-recall-form" novalidate>
-        <h2 class="intro-title">Follow-up Questions</h2>
-        <p class="muted post-instruction">These questions refer to the actual proposal you just decided on, not the example shown earlier.</p>
+        <h2 class="intro-title">Task Questions</h2>
         <div class="form-question">
           <label class="question-text" for="recall-you-cents">Please recall the actual proposal you just decided on. How many cents would you receive if you accepted?</label>
           <div class="numeric-answer-row">
@@ -1007,9 +1098,8 @@ function postRecallTrial() {
             <span>cents</span>
           </div>
         </div>
-        ${scaleQuestionHtml("recall_confidence_7", "How confident are you that you recalled the amounts correctly?", "1 - Not confident at all", "7 - Very confident")}
-        <button type="submit" class="form-submit">Submit</button>
-        <div id="post-required" class="required-note">Please enter whole numbers from 0 to 100 and answer the confidence question before continuing.</div>
+        <button type="submit" class="form-submit">Continue</button>
+        <div id="post-required" class="required-note">Please enter whole numbers from 0 to 100 before continuing.</div>
       </form>
     `),
     choices: "NO_KEYS",
@@ -1028,16 +1118,11 @@ function postRecallTrial() {
           });
         }
       });
-      Array.from(form.querySelectorAll(`input[name="recall_confidence_7"]`)).forEach(function (input) {
-        input.addEventListener("change", function () {
-          questionRt.recall_confidence_7 = Math.round(performance.now() - pageStart);
-        });
-      });
       form.addEventListener("submit", function (event) {
         event.preventDefault();
         const response = collectFormData(form);
         const validInteger = value => /^\d+$/.test(value) && Number(value) >= 0 && Number(value) <= 100;
-        if (!validInteger(response.recall_you_cents || "") || !validInteger(response.recall_proposer_cents || "") || !response.recall_confidence_7) {
+        if (!validInteger(response.recall_you_cents || "") || !validInteger(response.recall_proposer_cents || "")) {
           warning.style.display = "block";
           return;
         }
@@ -1046,7 +1131,6 @@ function postRecallTrial() {
           post_questionnaire_page: 3,
           recall_you_cents: Number(response.recall_you_cents),
           recall_proposer_cents: Number(response.recall_proposer_cents),
-          recall_confidence_7: response.recall_confidence_7,
           post_page3_rt: Math.round(performance.now() - pageStart),
           post_page3_rt_json: JSON.stringify(questionRt)
         });
@@ -1056,36 +1140,70 @@ function postRecallTrial() {
 }
 
 function postOpenEndedTrial() {
+  const options = [
+    { value: "some_money_over_nothing", label: "I focused on receiving some money rather than receiving nothing." },
+    { value: "fairness", label: "I focused on whether the proposal was fair." },
+    { value: "amount_difference", label: "I focused on the difference between my amount and the proposer's amount." },
+    { value: "presentation", label: "I focused on the way the proposal was presented." },
+    { value: "influence_attempt", label: "I focused on whether the proposer seemed to be trying to influence my impression." },
+    { value: "quick_intuitive", label: "I made the decision quickly or intuitively." },
+    { value: "other", label: "Other:" }
+  ];
   return {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: shellHtml(`
       <form id="post-open-form" novalidate>
-        <h2 class="intro-title">Follow-up Questions</h2>
-        <p class="muted post-instruction">Your feedback is very important to us. Thank you for sharing your thoughts.</p>
+        <h2 class="intro-title">Task Questions</h2>
         <div class="form-question">
-          <label class="question-text post-open-question" for="study-issue-comment">Was there anything about the proposal, the chart, the amounts shown, or the study overall that was unclear, confusing, or unexpected? Any feedback is helpful. If everything was clear, you may simply write "No."</label>
+          <div class="question-text">Which of the following best describes your main consideration when making your decision?</div>
+          <div class="single-choice-list" role="radiogroup" aria-label="Main consideration">
+            ${options.map(function (option) {
+              return `
+                <label class="single-choice-option">
+                  <input type="radio" name="main_consideration" value="${option.value}">
+                  <span>${option.label}</span>
+                  ${option.value === "other"
+                    ? `<input id="main-consideration-other" class="other-text-input" name="main_consideration_other" type="text" aria-label="Other main consideration">`
+                    : ""}
+                </label>
+              `;
+            }).join("")}
+          </div>
+          <div id="main-consideration-required" class="question-required">Please choose one option before continuing.</div>
+        </div>
+        <div class="form-question">
+          <label class="question-text post-open-question" for="study-issue-comment">Was anything unclear, confusing, or unexpected in this task?</label>
+          <p>You may leave this blank if everything was clear.</p>
           <textarea id="study-issue-comment" class="text-area post-open-textarea" name="study_issue_comment" rows="5"></textarea>
         </div>
         <button type="submit" class="form-submit">Submit</button>
-        <div id="post-required" class="required-note">Please answer this question before continuing.</div>
       </form>
     `),
     choices: "NO_KEYS",
     data: { phase: "post_questionnaire_page_4" },
+    on_start: function () {
+      plannedFullscreenExit = true;
+      fullscreenAbortArmed = false;
+      if (currentFullscreenElement() && document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    },
     on_load: function () {
       const pageStart = performance.now();
       const form = document.getElementById("post-open-form");
-      const warning = document.getElementById("post-required");
+      const warning = document.getElementById("main-consideration-required");
       form.addEventListener("submit", function (event) {
         event.preventDefault();
         const response = collectFormData(form);
-        if (!(response.study_issue_comment || "").trim()) {
+        if (!response.main_consideration) {
           warning.style.display = "block";
           return;
         }
         warning.style.display = "none";
         jsPsych.finishTrial({
           post_questionnaire_page: 4,
+          main_consideration: response.main_consideration,
+          main_consideration_other: (response.main_consideration_other || "").trim(),
           study_issue_comment: response.study_issue_comment.trim(),
           post_page4_rt: Math.round(performance.now() - pageStart)
         });
@@ -1097,18 +1215,55 @@ function postOpenEndedTrial() {
 function postQuestionnaireTrials() {
   return [
     postScaleTrial([
-      { name: "fairness_7", text: "How fair do you think the proposal was?", left: "1 - Very unfair", right: "7 - Very fair" },
-      { name: "acceptability_7", text: "How acceptable did you find this proposal?", left: "1 - Completely unacceptable", right: "7 - Completely acceptable" },
-      { name: "anger_7", text: "How angry did the proposal make you feel?", left: "1 - Not angry at all", right: "7 - Extremely angry" },
-      { name: "proposer_selfish_7", text: "How selfish did the proposer seem to you?", left: "1 - Not selfish at all", right: "7 - Extremely selfish" }
+      {
+        name: "unfairness_7",
+        text: "How unfair do you think this proposal was?",
+        left: "1 = Not unfair at all",
+        right: "7 = Very unfair"
+      },
+      {
+        name: "acceptability_7",
+        text: "How acceptable did you find this proposal?",
+        left: "1 = Completely unacceptable",
+        right: "7 = Completely acceptable"
+      },
+      {
+        name: "anger_7",
+        text: "How angry did this proposal make you feel?",
+        left: "1 = Not angry at all",
+        right: "7 = Extremely angry"
+      },
+      {
+        name: "felt_amount_difference_7",
+        text: "How large did the difference between your amount and the proposer's amount feel?",
+        left: "1 = Very small",
+        right: "7 = Very large"
+      }
     ], 1),
     postScaleTrial([
-      { name: "felt_own_share_size_7", text: "Thinking back to the proposal, how large did your share feel?", left: "1 - Very small", right: "7 - Very large" },
-      { name: "felt_amount_difference_7", text: "Thinking back to the proposal, how large did the difference between your amount and the proposer's amount feel?", left: "1 - Very small", right: "7 - Very large" }
+      {
+        name: "presentation_misleading_7",
+        text: "How misleading was the way this proposal was presented?",
+        left: "1 = Not misleading at all",
+        right: "7 = Very misleading"
+      },
+      {
+        name: "presentation_influence_7",
+        text: "To what extent did the way this proposal was presented seem designed to influence your impression of the proposal?",
+        left: "1 = Not at all",
+        right: "7 = Very much"
+      }
     ], 2),
     postRecallTrial(),
     postOpenEndedTrial()
   ];
+}
+
+function pretestTaskTrials() {
+  const trials = [stageMessageTrial("choice")];
+  trials.push(proposalDecisionTrial());
+  trials.push(recordedBlankTrial());
+  return trials;
 }
 
 function localSaveNoticeTrial() {
@@ -1135,12 +1290,7 @@ function savingTrial() {
     stimulus: `<div class="study-shell"><div class="qualtrics-card standalone saving-card"><h2>Saving your data...</h2><p>Please do not close this page.</p></div></div>`,
     choices: "NO_KEYS",
     trial_duration: 500,
-    data: { phase: "before_save" },
-    on_start: function () {
-      if (comprehensionPassed) {
-        setStoredStudyStatus("completed");
-      }
-    }
+    data: { phase: "before_save" }
   };
 }
 
@@ -1151,7 +1301,13 @@ function pipeSaveTrial() {
     experiment_id: DATAPIPE_EXPERIMENT_ID,
     filename: data_filename,
     data_string: () => getFilteredDataCsv(),
-    wait_message: "<div class='study-shell'><div class='qualtrics-card standalone saving-card'><h2>Saving your data...</h2><p>Please do not close this page.</p></div></div>"
+    wait_message: "<div class='study-shell'><div class='qualtrics-card standalone saving-card'><h2>Saving your data...</h2><p>Please do not close this page.</p></div></div>",
+    on_finish: function () {
+      if (comprehensionPassed) {
+        dataSavedToDatapipe = true;
+        setStoredStudyStatus("completed");
+      }
+    }
   };
 }
 
@@ -1200,18 +1356,9 @@ async function buildAndRunExperiment() {
     return;
   }
 
-  const { conditionNumber, source } = await getDatapipeCondition();
-  const conditionInfo = conditionTable[conditionNumber];
-
-  jsPsych.data.addProperties({
-    datapipe_condition_source: source,
-    condition_index: conditionInfo.condition_index,
-    condition_label: conditionInfo.condition_label
-  });
-
   timeline.push({
     type: jsPsychPreload,
-    images: ["ModifiedMullerLyer.png"],
+    images: ["ModifiedMullerLyer.png", "instruction-flow_proposerblue.png", "instruction-flow_proposerorange.png"],
     continue_after_error: true,
     data: { phase: "preload" }
   });
@@ -1265,18 +1412,19 @@ async function buildAndRunExperiment() {
     }
   });
 
+  timeline.push(conditionAssignmentTrial());
   timeline.push(instructionTrial());
-  timeline.push(comprehensionTrial(conditionInfo));
+  timeline.push(comprehensionTrial());
 
   timeline.push({
-    timeline: [warningTrial(), instructionTrial(), comprehensionTrial(conditionInfo)],
+    timeline: [warningTrial(), instructionTrial(), comprehensionTrial()],
     conditional_function: function () {
       return !comprehensionPassed && !excludedForComprehension;
     }
   });
 
   timeline.push({
-    timeline: [decisionTrial(conditionInfo), ...postQuestionnaireTrials()],
+    timeline: [...pretestTaskTrials(), ...postQuestionnaireTrials()],
     conditional_function: function () {
       return comprehensionPassed;
     }
@@ -1299,7 +1447,7 @@ async function buildAndRunExperiment() {
   timeline.push({
     timeline: [finalPageTrial()],
     conditional_function: function () {
-      return comprehensionPassed;
+      return comprehensionPassed && (!isDatapipeConfigured() || dataSavedToDatapipe);
     }
   });
 
@@ -1314,5 +1462,3 @@ async function buildAndRunExperiment() {
 }
 
 buildAndRunExperiment();
-
-
